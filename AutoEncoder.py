@@ -41,7 +41,7 @@ def autoEncoder(x_train, params):
 
                     name='encoder2')(encoded)
     encoded = Dense(params['third_layer'], activation=params['first_activation'],
-                    kernel_initializer=params['kernel_initializer'],
+                    kernel_initializer=params['kernel_initializer'], activity_regularizer=regularizers.l1(10e-5),
 
                     name='encoder3')(encoded)
    # l1 = BatchNormalization()(encoded)
