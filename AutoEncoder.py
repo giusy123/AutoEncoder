@@ -20,6 +20,7 @@ from keras.layers import Input, Dense, Dropout, BatchNormalization, Flatten
 from keras import optimizers
 from keras.models import Model
 from keras import regularizers
+from keras.losses import mean_squared_logarithmic_error
 
 
 import seaborn as sns
@@ -109,8 +110,8 @@ def main():
     #split to validate model during training
     VALIDATION_SPLIT = .2
 
-    pathTrain = 'KDDTrain+aggregateOneClsNumeric'
-    pathTest = 'KDDTest+aggregateOneClsNumeric'
+    pathTrain = 'KDDTrain+aggregateNumeric'
+    pathTest = 'KDDTest+aggregateNumeric'
     train = pd.read_csv(pathTrain + ".csv")
     test = pd.read_csv(pathTest + ".csv")
 
@@ -120,7 +121,7 @@ def main():
         # callbacks.ModelCheckpoint(
         #   filepath='best_model.{epoch:02d}-{val_loss:.2f}.h5',
         #  monitor='val_loss', save_best_only=True),
-        callbacks.EarlyStopping(monitor='loss', min_delta=0.0001, patience=4, restore_best_weights=True),
+        callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=4, restore_best_weights=True),
         # reduce_lr
     ]
 
@@ -129,17 +130,17 @@ def main():
     print('Model with autoencoder+softmax with training encoder weights')
     # parametri per autoencoder
     p = {
-        'first_layer': 80,
+        'first_layer': 60,
         'second_layer': 30,
         'third_layer': 10,
         'batch_size': 64,
         'epochs': 150,
         'optimizer': optimizers.Adam,
         'kernel_initializer': 'glorot_uniform',
-        'losses': 'mse',
+        'losses': 'msle',#mse', #mse o msle
         'first_activation': 'tanh',
         'second_activation': 'tanh',
-        'third_activation': 'sigmoid'}
+        'third_activation': 'tanh'}
 
     autoencoder = autoEncoder(train_X, p)
     autoencoder.summary()
