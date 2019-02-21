@@ -137,7 +137,7 @@ def main():
         'epochs': 150,
         'optimizer': optimizers.Adam,
         'kernel_initializer': 'glorot_uniform',
-        'losses': 'msle',#mse', #mse o msle
+        'losses': 'msle',#mse', #mse o msle a seconda del dataset
         'first_activation': 'tanh',
         'second_activation': 'tanh',
         'third_activation': 'tanh'}
