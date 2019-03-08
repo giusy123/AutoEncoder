@@ -110,8 +110,8 @@ def main():
     #split to validate model during training
     VALIDATION_SPLIT = .2
 
-    pathTrain = 'KDDTrain+aggregateNumeric'
-    pathTest = 'KDDTest+aggregateNumeric'
+    pathTrain = 'KDDTrain+aggregateOneClsNumeric'
+    pathTest = 'KDDTest+aggregateOneClsNumeric'
     train = pd.read_csv(pathTrain + ".csv")
     test = pd.read_csv(pathTest + ".csv")
 
@@ -137,7 +137,7 @@ def main():
         'epochs': 150,
         'optimizer': optimizers.Adam,
         'kernel_initializer': 'glorot_uniform',
-        'losses': 'msle',#mse', #mse o msle a seconda del dataset
+        'losses': 'mse',#mse', #mse o msle a seconda del dataset
         'first_activation': 'tanh',
         'second_activation': 'tanh',
         'third_activation': 'tanh'}
@@ -145,7 +145,7 @@ def main():
     autoencoder = autoEncoder(train_X, p)
     autoencoder.summary()
 
-    #estract encoder layers from autoEncoder
+    #extract encoder layers from autoEncoder
     encoder = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('encoder3').output)
     encoder.summary()
 
