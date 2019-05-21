@@ -144,7 +144,6 @@ def main():
 
     autoencoder = autoEncoder(train_X, p)
     autoencoder.summary()
-
     #extract encoder layers from autoEncoder
     encoder = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('encoder3').output)
     encoder.summary()
@@ -162,6 +161,15 @@ def main():
     score = autoencoder.evaluate(test_X, test_X, verbose=1)
     print('Test loss normal:', score[0])
     print('Test accuracy normal:', score[1])
+
+    #Using encoder for feature extraction
+    encoded_train = pd.DataFrame(encoder.predict(train_X))
+    encoded_test= pd.DataFrame(encoder.predict(test_X))
+    print(encoded_train.head(8))
+    encoded_train.to_csv('train_reduced.csv', index=False)
+    print(encoded_test.head(8))
+    encoded_test.to_csv('test_reduced.csv', index=False)
+
 
 
 
