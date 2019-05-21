@@ -6,7 +6,7 @@ import os
 import pathlib
 
 
-pathInput="KDDTest+"
+pathInput="KDDTrain+"
 pathOutput=pathInput+"aggregate"
 
 # name last column mi serve per togliere la colonna classification dal dataframe
