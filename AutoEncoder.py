@@ -34,29 +34,24 @@ def autoEncoder(x_train, params):
     # encoder_layer
     # Dropoout?
     #  input1 = Dropout(.2)(input)
-    encoded = Dense(params['first_layer'], activation=params['first_activation'],
+    encoded = Dense(params['first_layer'], activation=params['activation'],
                     kernel_initializer=params['kernel_initializer'],
                     name='encoder1')(input)
-    encoded = Dense(params['second_layer'], activation=params['first_activation'],
+    encoded = Dense(params['second_layer'], activation=params['activation'],
                     kernel_initializer=params['kernel_initializer'],
 
                     name='encoder2')(encoded)
-    encoded = Dense(params['third_layer'], activation=params['first_activation'],
-                    kernel_initializer=params['kernel_initializer'], activity_regularizer=regularizers.l1(10e-5),
-
-                    name='encoder3')(encoded)
    # l1 = BatchNormalization()(encoded)
    # encoded = Dropout(.5)(encoded)
-    decoded = Dense(params['second_layer'], activation=params['first_activation'], kernel_initializer=params['kernel_initializer'], name='decoder1')(encoded)
-    decoded = Dense(params['first_layer'], activation=params['second_activation'], kernel_initializer=params['kernel_initializer'], name='decoder2')(decoded)
-    decoded = Dense(n_col, activation=params['third_activation'], kernel_initializer=params['kernel_initializer'], name='decoder')(decoded)
+    decoded = Dense(params['first_layer'], activation=params['activation'], kernel_initializer=params['kernel_initializer'], name='decoder1')(encoded)
+    decoded = Dense(n_col, activation='linear', kernel_initializer=params['kernel_initializer'], name='decoder')(decoded)
     # serve per L2 normalization?
     # encoded1_bn = BatchNormalization()(encoded)
 
     autoencoder = Model(input=input, output=decoded)
     autoencoder.summary
-    learning_rate = 0.001
-    decay = learning_rate / params['epochs']
+    #learning_rate = 0.001
+    #decay = learning_rate / params['epochs']
     autoencoder.compile(loss=params['losses'],
                         optimizer=params['optimizer']()#(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=10e-8, amsgrad=False)#
                          , metrics=['accuracy'])
@@ -94,8 +89,8 @@ def printPlotLoss(history, d):
 
 
 def printPlotAccuracy(history, d):
-    acc = history.history['acc']
-    val_acc = history.history['val_acc']
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
     epochs = range(1, len(acc) + 1)
     plt.plot(epochs, acc, 'b', label='Training acc')
     plt.plot(epochs, val_acc, 'r', label='Validation acc')
@@ -118,11 +113,7 @@ def main():
     train_X, train_Y, test_X, test_Y= getXY(train, test)
 
     callbacks_list = [
-        # callbacks.ModelCheckpoint(
-        #   filepath='best_model.{epoch:02d}-{val_loss:.2f}.h5',
-        #  monitor='val_loss', save_best_only=True),
-        callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=4, restore_best_weights=True),
-        # reduce_lr
+        callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10, restore_best_weights=True),
     ]
 
 
@@ -130,22 +121,20 @@ def main():
     print('Model with autoencoder+softmax with training encoder weights')
     # parametri per autoencoder
     p = {
-        'first_layer': 60,
-        'second_layer': 30,
-        'third_layer': 10,
+        'first_layer': 30,
+        'second_layer': 10,
         'batch_size': 64,
-        'epochs': 150,
+        'epochs': 15,
         'optimizer': optimizers.Adam,
         'kernel_initializer': 'glorot_uniform',
-        'losses': 'mse',#mse', #mse o msle a seconda del dataset
-        'first_activation': 'tanh',
-        'second_activation': 'tanh',
-        'third_activation': 'tanh'}
+        'losses': 'mse',
+        'activation': 'relu'
+    }
 
     autoencoder = autoEncoder(train_X, p)
     autoencoder.summary()
-    #extract encoder layers from autoEncoder
-    encoder = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('encoder3').output)
+    # encoder layer from autoEncoder
+    encoder = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('encoder2').output)
     encoder.summary()
 
     history = autoencoder.fit(train_X, train_X,
